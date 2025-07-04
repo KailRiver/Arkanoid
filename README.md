@@ -32,8 +32,7 @@
 
 1. Клонировать репозиторий:
    ```bash
-   git clone https://github.com/yourusername/arkanoid-game.git
-   cd arkanoid-game
+   git clone git@github.com:KailRiver/Arkanoid.git
    ```
 2. Собрать и запустить проект:
    ```bash
