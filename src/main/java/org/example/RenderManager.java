@@ -9,6 +9,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import java.util.List;
 
 public class RenderManager {
     private final Pane root;
@@ -40,6 +41,12 @@ public class RenderManager {
     }
 
     private void createUI() {
+        createInfoPanel();
+        createPauseMenu();
+        createEndGameMenu();
+    }
+
+    private void createInfoPanel() {
         infoPanel = new HBox(20);
         infoPanel.setStyle("-fx-background-color: rgba(0,0,0,0.7);");
         infoPanel.setLayoutX(10);
@@ -51,7 +58,9 @@ public class RenderManager {
 
         infoPanel.getChildren().addAll(scoreLabel, levelLabel, livesLabel);
         root.getChildren().add(infoPanel);
+    }
 
+    private void createPauseMenu() {
         pauseMenu = new VBox(20);
         pauseMenu.setAlignment(Pos.CENTER);
         pauseMenu.setStyle("-fx-background-color: rgba(0,0,0,0.8);");
@@ -66,7 +75,9 @@ public class RenderManager {
 
         pauseMenu.getChildren().addAll(pauseLabel, resumeBtn, menuBtn);
         uiLayer.getChildren().add(pauseMenu);
+    }
 
+    private void createEndGameMenu() {
         endGameMenu = new VBox(20);
         endGameMenu.setAlignment(Pos.CENTER);
         endGameMenu.setStyle("-fx-background-color: rgba(0,0,0,0.8);");
@@ -147,11 +158,18 @@ public class RenderManager {
         livesLabel.setText("Lives: " + gameState.getLives());
     }
 
-    public void renderGameObjects(GameState gameState) {
+    public void renderGameObjects(GameState gameState, GameContext context) {
         root.getChildren().clear();
         root.getChildren().add(infoPanel);
 
+        // Отрисовка основного шара
         root.getChildren().add(gameState.getBall().getCircle());
+
+        // Отрисовка дополнительных шаров
+        for (Ball ball : context.getExtraBalls()) {
+            root.getChildren().add(ball.getCircle());
+        }
+
         root.getChildren().add(gameState.getPaddle().getRect());
 
         for (Block block : gameState.getBlocks()) {
@@ -159,5 +177,49 @@ public class RenderManager {
         }
 
         uiLayer.toFront();
+    }
+
+    public void showHighScores(List<HighScoreManager.HighScore> highScores, Runnable onMenuClick) {
+        root.getChildren().clear();
+
+        Pane overlay = new Pane();
+        overlay.setStyle("-fx-background-color: rgba(0,0,0,0.7);");
+        overlay.setPrefSize(800, 600);
+
+        VBox scoresBox = new VBox(10);
+        scoresBox.setAlignment(Pos.CENTER);
+        scoresBox.setLayoutX(200);
+        scoresBox.setLayoutY(100);
+        scoresBox.setPrefSize(400, 400);
+        scoresBox.setStyle("-fx-background-color: rgba(0,0,0,0.9);");
+        scoresBox.setPadding(new Insets(20));
+
+        Label title = new Label("High Scores");
+        title.setFont(Font.font("Arial", FontWeight.BOLD, 30));
+        title.setTextFill(Color.GOLD);
+
+        scoresBox.getChildren().add(title);
+
+        for (int i = 0; i < Math.min(10, highScores.size()); i++) {
+            HighScoreManager.HighScore score = highScores.get(i);
+            Label scoreLabel = new Label(String.format(
+                    "%d. %s - %d",
+                    i + 1,
+                    score.getPlayerName(),
+                    score.getScore()
+            ));
+            scoreLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 18));
+            scoreLabel.setTextFill(Color.WHITE);
+            scoresBox.getChildren().add(scoreLabel);
+        }
+
+        Button menuBtn = new Button("Main Menu");
+        menuBtn.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+        menuBtn.setTextFill(Color.WHITE);
+        menuBtn.setStyle("-fx-background-color: #3498db; -fx-background-radius: 5;");
+        menuBtn.setOnAction(e -> onMenuClick.run());
+
+        scoresBox.getChildren().add(menuBtn);
+        root.getChildren().addAll(overlay, scoresBox);
     }
 }

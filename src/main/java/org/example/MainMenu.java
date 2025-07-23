@@ -13,7 +13,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class MainMenu {
-    private Stage stage;
+    private final Stage stage;
 
     public MainMenu(Stage primaryStage) {
         this.stage = primaryStage;
@@ -21,8 +21,11 @@ public class MainMenu {
     }
 
     private void createMenu() {
+        VBox menuLayout = new VBox(30);
+        menuLayout.setAlignment(Pos.CENTER);
+        menuLayout.setPadding(new Insets(50));
+
         try {
-            // Загрузка фона
             Image backgroundImage = new Image(getClass().getResourceAsStream("/background.jpg"));
             BackgroundImage background = new BackgroundImage(
                     backgroundImage,
@@ -31,47 +34,26 @@ public class MainMenu {
                     BackgroundPosition.CENTER,
                     new BackgroundSize(100, 100, true, true, false, true)
             );
-
-            VBox menuLayout = new VBox(30);
-            menuLayout.setAlignment(Pos.CENTER);
             menuLayout.setBackground(new Background(background));
-            menuLayout.setPadding(new Insets(50));
-
-            Text title = new Text("ARKANOID");
-            title.setFont(Font.font("Arial", FontWeight.BOLD, 60));
-            title.setFill(Color.WHITE);
-            title.setStyle("-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 10, 0, 0, 0);");
-
-            Button startBtn = createStyledButton("Новая игра", Color.DODGERBLUE);
-            Button exitBtn = createStyledButton("Выход", Color.INDIANRED);
-
-            startBtn.setOnAction(e -> showDifficultyMenu());
-            exitBtn.setOnAction(e -> System.exit(0));
-
-            menuLayout.getChildren().addAll(title, startBtn, exitBtn);
-            Scene scene = new Scene(menuLayout, 800, 600);
-            stage.setScene(scene);
-            stage.show();
-
         } catch (Exception e) {
-            // Fallback если фон не загрузился
-            VBox menuLayout = new VBox(30);
-            menuLayout.setAlignment(Pos.CENTER);
             menuLayout.setStyle("-fx-background-color: black;");
-            menuLayout.setPadding(new Insets(50));
-
-            Text title = new Text("ARKANOID");
-            title.setFont(Font.font("Arial", FontWeight.BOLD, 60));
-            title.setFill(Color.WHITE);
-
-            Button startBtn = createStyledButton("Новая игра", Color.DODGERBLUE);
-            Button exitBtn = createStyledButton("Выход", Color.INDIANRED);
-
-            menuLayout.getChildren().addAll(title, startBtn, exitBtn);
-            Scene scene = new Scene(menuLayout, 800, 600);
-            stage.setScene(scene);
-            stage.show();
         }
+
+        Text title = new Text("ARKANOID");
+        title.setFont(Font.font("Arial", FontWeight.BOLD, 60));
+        title.setFill(Color.WHITE);
+        title.setStyle("-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 10, 0, 0, 0);");
+
+        Button startBtn = createStyledButton("Новая игра", Color.DODGERBLUE);
+        Button exitBtn = createStyledButton("Выход", Color.INDIANRED);
+
+        startBtn.setOnAction(e -> showDifficultyMenu());
+        exitBtn.setOnAction(e -> System.exit(0));
+
+        menuLayout.getChildren().addAll(title, startBtn, exitBtn);
+        Scene scene = new Scene(menuLayout, 800, 600);
+        stage.setScene(scene);
+        stage.show();
     }
 
     private Button createStyledButton(String text, Color color) {
@@ -83,14 +65,8 @@ public class MainMenu {
         btn.setPadding(new Insets(10, 30, 10, 30));
         btn.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 5, 0, 0, 1);");
 
-        btn.setOnMouseEntered(e -> {
-            btn.setScaleX(1.05);
-            btn.setScaleY(1.05);
-        });
-        btn.setOnMouseExited(e -> {
-            btn.setScaleX(1.0);
-            btn.setScaleY(1.0);
-        });
+        btn.setOnMouseEntered(e -> btn.setEffect(new javafx.scene.effect.Glow(0.3)));
+        btn.setOnMouseExited(e -> btn.setEffect(null));
 
         return btn;
     }
@@ -98,7 +74,21 @@ public class MainMenu {
     private void showDifficultyMenu() {
         VBox difficultyMenu = new VBox(20);
         difficultyMenu.setAlignment(Pos.CENTER);
-        difficultyMenu.setStyle("-fx-background-color: rgba(0,0,0,0.7);");
+        difficultyMenu.setPadding(new Insets(50));
+
+        try {
+            Image backgroundImage = new Image(getClass().getResourceAsStream("/background.jpg"));
+            BackgroundImage background = new BackgroundImage(
+                    backgroundImage,
+                    BackgroundRepeat.NO_REPEAT,
+                    BackgroundRepeat.NO_REPEAT,
+                    BackgroundPosition.CENTER,
+                    new BackgroundSize(100, 100, true, true, false, true)
+            );
+            difficultyMenu.setBackground(new Background(background));
+        } catch (Exception e) {
+            difficultyMenu.setStyle("-fx-background-color: rgba(0,0,0,0.7);");
+        }
 
         Text title = new Text("Выберите сложность");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 30));
@@ -114,14 +104,13 @@ public class MainMenu {
 
         difficultyMenu.getChildren().addAll(title, easyBtn, mediumBtn, hardBtn);
 
-        StackPane root = new StackPane();
-        root.getChildren().add(difficultyMenu);
-
+        StackPane root = new StackPane(difficultyMenu);
         Scene scene = new Scene(root, 800, 600);
         stage.setScene(scene);
     }
 
     private void startGame(Difficulty difficulty) {
-        new Game(stage, difficulty);
+        stage.close();
+        new Game(new Stage(), difficulty);
     }
 }
